@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
 import { User } from '../../entities/user.entity';
 
 @Injectable()
@@ -33,6 +34,19 @@ export class AuthService {
     if (!valid) {
       throw new UnauthorizedException('邮箱或密码错误');
     }
+    return this.generateToken(user);
+  }
+
+  async guestLogin() {
+    const guestId = randomUUID();
+    const guestEmail = `guest_${guestId.substring(0, 8)}@jobmatcher.local`;
+    const passwordHash = await bcrypt.hash(randomUUID(), 10);
+    const user = this.userRepo.create({
+      email: guestEmail,
+      passwordHash,
+      name: '访客' + guestId.substring(0, 4),
+    });
+    await this.userRepo.save(user);
     return this.generateToken(user);
   }
 
