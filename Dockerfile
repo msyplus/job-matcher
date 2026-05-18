@@ -2,7 +2,7 @@
 FROM node:24-alpine AS client-builder
 WORKDIR /app/client
 COPY client/package.json client/package-lock.json ./
-RUN npm ci
+RUN npm install
 COPY client/ ./
 RUN npm run build
 
@@ -10,7 +10,7 @@ RUN npm run build
 FROM node:24-alpine AS server-builder
 WORKDIR /app/server
 COPY server/package.json server/package-lock.json ./
-RUN npm ci
+RUN npm install
 COPY server/ ./
 RUN npm run build
 
@@ -18,20 +18,12 @@ RUN npm run build
 FROM node:24-alpine
 WORKDIR /app
 
-# Copy server dependencies
 COPY --from=server-builder /app/server/package.json /app/server/package-lock.json ./
 RUN npm ci --production
 
-# Copy server dist
 COPY --from=server-builder /app/server/dist ./server/dist
-
-# Copy client dist
 COPY --from=client-builder /app/client/dist ./client/dist
 
-# Copy .env (create a default if not exists)
-COPY server/.env .env 2>/dev/null || echo "PORT=3000" > .env
-
-# Create data directory for SQLite
 RUN mkdir -p /app/data
 
 ENV NODE_ENV=production
