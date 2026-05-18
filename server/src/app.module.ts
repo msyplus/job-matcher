@@ -11,6 +11,8 @@ import { ApplicationModule } from './modules/application/application.module';
 import { AiModule } from './modules/ai/ai.module';
 import { FeedbackModule } from './modules/feedback/feedback.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { JobSearchModule } from './modules/job-search/job-search.module';
+import { JobRecommendModule } from './modules/job-recommend/job-recommend.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { AdminModule } from './modules/admin/admin.module';
     AiModule,
     FeedbackModule,
     AdminModule,
+    JobSearchModule,
+    JobRecommendModule,
   ],
   providers: [InitDbService],
 })

@@ -6,6 +6,7 @@ const navItems = [
   { path: '/experience', label: '经历库', icon: '📋' },
   { path: '/jd-match', label: 'JD 匹配', icon: '🎯' },
   { path: '/resume', label: '简历生成', icon: '📝' },
+  { path: '/recommend', label: '岗位推荐', icon: '💼' },
   { path: '/tracking', label: '投递追踪', icon: '📮' },
   { path: '/feedback', label: '反馈', icon: '💬' },
 ];

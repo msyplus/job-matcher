@@ -7,6 +7,17 @@ interface User {
   name: string;
 }
 
+function syncToExtension(token: string | null) {
+  if (typeof window !== 'undefined' && (window as any).chrome?.storage) {
+    const chrome = (window as any).chrome;
+    if (token) {
+      chrome.storage.local.set({ token });
+    } else {
+      chrome.storage.local.remove('token');
+    }
+  }
+}
+
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -26,6 +37,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ loading: true });
     const { data } = await api.post('/auth/login', { email, password });
     localStorage.setItem('token', data.accessToken);
+    syncToExtension(data.accessToken);
     set({ user: data.user, token: data.accessToken, loading: false });
   },
 
@@ -33,16 +45,21 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ loading: true });
     const { data } = await api.post('/auth/register', { email, password, name });
     localStorage.setItem('token', data.accessToken);
+    syncToExtension(data.accessToken);
     set({ user: data.user, token: data.accessToken, loading: false });
   },
 
   logout: () => {
     localStorage.removeItem('token');
+    syncToExtension(null);
     set({ user: null, token: null });
   },
 
   init: () => {
     const token = localStorage.getItem('token');
-    if (token) set({ token });
+    if (token) {
+      syncToExtension(token);
+      set({ token });
+    }
   },
 }));

@@ -10,6 +10,7 @@ import { JobDescription } from '../entities/job-description.entity';
 import { GeneratedResume } from '../entities/generated-resume.entity';
 import { Application } from '../entities/application.entity';
 import { Feedback } from '../entities/feedback.entity';
+import { RecommendedJob } from '../entities/recommended-job.entity';
 
 export const databaseConfig: TypeOrmModuleOptions = {
   type: 'sqljs',
@@ -17,7 +18,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
   location: path.resolve(process.env.DB_PATH || './data/jobmatcher.db'),
   entities: [
     User, Education, WorkExperience, Project, Skill,
-    Certificate, JobDescription, GeneratedResume, Application, Feedback,
+    Certificate, JobDescription, GeneratedResume, Application, Feedback, RecommendedJob,
   ],
   synchronize: false,
   logging: false,

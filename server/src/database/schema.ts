@@ -107,4 +107,20 @@ CREATE TABLE IF NOT EXISTS feedbacks (
   adminNote TEXT,
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS recommended_jobs (
+  id TEXT PRIMARY KEY,
+  userId TEXT NOT NULL REFERENCES users(id),
+  title TEXT NOT NULL,
+  company TEXT NOT NULL,
+  location TEXT,
+  salary TEXT,
+  description TEXT,
+  sourceUrl TEXT,
+  sourcePlatform TEXT DEFAULT 'boss',
+  matchScore INTEGER DEFAULT 0,
+  matchDetails TEXT,
+  status TEXT DEFAULT 'new',
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 `;
