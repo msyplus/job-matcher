@@ -1,0 +1,15 @@
+{
+  "name": "job-matcher",
+  "version": "1.0.0",
+  "description": "AI-powered job application assistant MVP",
+  "scripts": {
+    "build": "cd client && npm run build && cd ../server && npm run build",
+    "start": "cd server && node dist/main.prod",
+    "dev": "concurrently \"cd server && npm run start:dev\" \"cd client && npm run dev\"",
+    "deploy": "npm run build && npm run start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "cross-env": "^7.0.0"
+  }
+}

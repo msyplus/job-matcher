@@ -1,0 +1,7 @@
+node_modules
+dist
+.git
+data
+*.md
+screenshots
+test-e2e.py

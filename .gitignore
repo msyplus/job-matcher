@@ -1,0 +1,7 @@
+node_modules/
+dist/
+data/
+.env
+screenshots/
+test-e2e.py
+*.db

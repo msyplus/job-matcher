@@ -1,0 +1,20 @@
+version: "3.8"
+services:
+  job-matcher:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_PATH=/app/data/jobmatcher.db
+      - JWT_SECRET=${JWT_SECRET:-dev-secret}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - DEEPSEEK_BASE_URL=${DEEPSEEK_BASE_URL:-https://api.deepseek.com/v1}
+      - DEEPSEEK_MODEL=${DEEPSEEK_MODEL:-deepseek-v4-pro}
+    volumes:
+      - jobmatcher-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  jobmatcher-data:
