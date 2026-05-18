@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: job-matcher
+    runtime: docker
+    repo: https://github.com/msyplus/job-matcher
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DEEPSEEK_API_KEY
+        sync: false
+    healthCheckPath: /api/auth/login
