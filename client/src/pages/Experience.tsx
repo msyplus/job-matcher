@@ -65,6 +65,29 @@ export default function Experience() {
     loadAll();
   };
 
+  const [uploading, setUploading] = useState(false);
+  const [uploadResult, setUploadResult] = useState<string[] | null>(null);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setUploadResult(null);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const { data } = await api.post('/experiences/upload-resume', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setUploadResult(data.saved || []);
+      loadAll();
+    } catch (err: any) {
+      setUploadResult(['解析失败: ' + (err.response?.data?.message || '请重试')]);
+    }
+    setUploading(false);
+    e.target.value = '';
+  };
+
   const complete = Math.min(100, (educations.length * 20) + (works.length * 25) + (skills.length * 10) + (certificates.length * 5));
   const tabs: { key: Tab; label: string; count: number }[] = [
     { key: 'education', label: '教育经历', count: educations.length },
@@ -81,6 +104,25 @@ export default function Experience() {
           <span className="text-sm text-gray-400">完整度 {complete}%</span>
           <button onClick={() => openModal(activeTab)} className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-700">+ 添加</button>
         </div>
+      </div>
+
+      {/* Resume Upload */}
+      <div className="bg-white rounded-xl border border-dashed border-indigo-300 p-6 mb-6 text-center">
+        <div className="text-3xl mb-2">📄</div>
+        <h3 className="font-semibold text-gray-800 mb-1">上传简历自动解析</h3>
+        <p className="text-sm text-gray-500 mb-4">支持 PDF / Word，AI 自动提取教育、工作、技能信息</p>
+        <label className={`inline-block px-6 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors ${uploading ? 'bg-gray-300 text-gray-500' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>
+          {uploading ? 'AI 解析中...' : '上传简历文件'}
+          <input type="file" accept=".pdf,.doc,.docx" onChange={handleUpload} disabled={uploading} className="hidden" />
+        </label>
+        {uploadResult && (
+          <div className="mt-4 text-left max-w-md mx-auto">
+            <div className="text-xs font-medium text-gray-600 mb-2">解析结果：</div>
+            {uploadResult.map((r, i) => (
+              <div key={i} className={`text-xs py-1 px-3 rounded mb-1 ${r.includes('失败') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700'}`}>{r}</div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex gap-1 mb-6 bg-white rounded-lg p-1 border border-gray-200">

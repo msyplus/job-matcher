@@ -1,11 +1,26 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ExperienceService } from './experience.service';
+import { ResumeParserService } from './resume-parser.service';
 
 @Controller('experiences')
 @UseGuards(JwtAuthGuard)
 export class ExperienceController {
-  constructor(private experienceService: ExperienceService) {}
+  constructor(
+    private experienceService: ExperienceService,
+    private resumeParser: ResumeParserService,
+  ) {}
+
+  @Post('upload-resume')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  async uploadResume(@Req() req: any, @UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new Error('请上传文件');
+    const parsed = await this.resumeParser.parse(file.buffer, file.originalname);
+    // Auto-save parsed data
+    await this.resumeParser.saveParsedData(req.user.id, parsed);
+    return parsed;
+  }
 
   // Education
   @Get('educations')
