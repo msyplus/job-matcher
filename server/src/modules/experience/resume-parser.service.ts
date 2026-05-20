@@ -16,9 +16,8 @@ export class ResumeParserService {
     if (ext === 'pdf') {
       try {
         const pdfModule: any = await import('pdf-parse');
-        const pdfParse = pdfModule.PDFParse || pdfModule.default || pdfModule;
-        const data = await pdfParse(buffer);
-        text = data.text;
+        const parser = new pdfModule.PDFParse(new Uint8Array(buffer));
+        text = await parser.getText();
       } catch (e: any) {
         throw new BadRequestException('PDF 解析失败：' + (e.message || '文件可能已加密、为扫描图片或格式不受支持，请尝试另存为文本PDF或使用Word格式'));
       }
