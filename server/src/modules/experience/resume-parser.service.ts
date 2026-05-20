@@ -11,24 +11,35 @@ export class ResumeParserService {
 
   async parse(buffer: Buffer, filename: string) {
     let text = '';
+    const ext = filename.split('.').pop()?.toLowerCase() || '';
 
-    try {
-      if (filename.endsWith('.pdf')) {
+    if (ext === 'pdf') {
+      try {
         const pdfModule: any = await import('pdf-parse');
         const pdfParse = pdfModule.default || pdfModule;
         const data = await pdfParse(buffer);
         text = data.text;
-      } else if (filename.endsWith('.docx') || filename.endsWith('.doc')) {
+      } catch (e: any) {
+        throw new Error('PDF 解析失败：' + (e.message || '文件可能已加密、为扫描图片或格式不受支持，请尝试另存为文本PDF或使用Word格式'));
+      }
+    } else if (ext === 'docx') {
+      try {
         const mammoth = await import('mammoth');
         const result = await mammoth.extractRawText({ buffer });
         text = result.value;
-      } else {
-        text = buffer.toString('utf-8');
+      } catch (e: any) {
+        throw new Error('Word 解析失败：' + e.message);
       }
-    } catch (e: any) {
-      // If PDF/Word parsing fails, try reading as plain text
-      console.error('File parse error:', e.message);
-      text = buffer.toString('utf-8').replace(/[^\x20-\x7E一-鿿　-〿＀-￯]/g, ' ');
+    } else if (ext === 'doc') {
+      try {
+        const mammoth = await import('mammoth');
+        const result = await mammoth.extractRawText({ buffer });
+        text = result.value;
+      } catch {
+        text = buffer.toString('utf-8').replace(/[^\x20-\x7E一-鿿　-〿＀-￯]/g, ' ');
+      }
+    } else {
+      text = buffer.toString('utf-8');
     }
 
     if (!text || text.length < 30) {
