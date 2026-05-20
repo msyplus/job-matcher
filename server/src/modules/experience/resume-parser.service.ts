@@ -12,32 +12,29 @@ export class ResumeParserService {
   async parse(buffer: Buffer, filename: string) {
     let text = '';
 
-    if (filename.endsWith('.pdf')) {
-      const pdfParse = require('pdf-parse');
-      const data = await pdfParse(buffer);
-      text = data.text;
-    } else if (filename.endsWith('.docx')) {
-      const mammoth = require('mammoth');
-      const result = await mammoth.extractRawText({ buffer });
-      text = result.value;
-    } else if (filename.endsWith('.doc')) {
-      // Old .doc format - try mammoth first, fallback to raw text
-      try {
-        const mammoth = require('mammoth');
+    try {
+      if (filename.endsWith('.pdf')) {
+        const pdfModule: any = await import('pdf-parse');
+        const pdfParse = pdfModule.default || pdfModule;
+        const data = await pdfParse(buffer);
+        text = data.text;
+      } else if (filename.endsWith('.docx') || filename.endsWith('.doc')) {
+        const mammoth = await import('mammoth');
         const result = await mammoth.extractRawText({ buffer });
         text = result.value;
-      } catch {
-        text = buffer.toString('utf-8').replace(/[^\x20-\x7E一-龥]/g, ' ');
+      } else {
+        text = buffer.toString('utf-8');
       }
-    } else {
-      text = buffer.toString('utf-8');
+    } catch (e: any) {
+      // If PDF/Word parsing fails, try reading as plain text
+      console.error('File parse error:', e.message);
+      text = buffer.toString('utf-8').replace(/[^\x20-\x7E一-鿿　-〿＀-￯]/g, ' ');
     }
 
     if (!text || text.length < 30) {
-      throw new Error('无法从文件中提取文本，请确认文件格式');
+      throw new Error('无法从文件中提取文本，请确认文件格式或尝试另存为PDF后重新上传');
     }
 
-    // Use AI to parse structured data
     const parsed = await this.parseWithAI(text);
     return parsed;
   }
