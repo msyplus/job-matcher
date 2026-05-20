@@ -16,10 +16,18 @@ export class ExperienceController {
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
   async uploadResume(@Req() req: any, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('请上传文件');
-    const parsed = await this.resumeParser.parse(file.buffer, file.originalname);
-    // Auto-save parsed data
-    await this.resumeParser.saveParsedData(req.user.id, parsed);
-    return parsed;
+    const ext = file.originalname.split('.').pop()?.toLowerCase();
+    if (!['pdf', 'docx', 'doc', 'txt'].includes(ext || '')) {
+      throw new BadRequestException('不支持的文件格式，请上传 PDF、Word 或 TXT 文件');
+    }
+    try {
+      const parsed = await this.resumeParser.parse(file.buffer, file.originalname);
+      await this.resumeParser.saveParsedData(req.user.id, parsed);
+      return parsed;
+    } catch (e: any) {
+      if (e instanceof BadRequestException) throw e;
+      throw new BadRequestException('解析失败：' + (e.message || '文件格式不支持，请尝试转换为 PDF 或 Word 格式后重新上传'));
+    }
   }
 
   // Education
