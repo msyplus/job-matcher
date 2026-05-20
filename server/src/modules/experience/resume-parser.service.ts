@@ -16,7 +16,7 @@ export class ResumeParserService {
     if (ext === 'pdf') {
       try {
         const pdfModule: any = await import('pdf-parse');
-        const pdfParse = pdfModule.default || pdfModule;
+        const pdfParse = pdfModule.PDFParse || pdfModule.default || pdfModule;
         const data = await pdfParse(buffer);
         text = data.text;
       } catch (e: any) {
