@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { AiService } from '../ai/ai.service';
 import { ExperienceService } from './experience.service';
 
@@ -20,7 +20,7 @@ export class ResumeParserService {
         const data = await pdfParse(buffer);
         text = data.text;
       } catch (e: any) {
-        throw new Error('PDF 解析失败：' + (e.message || '文件可能已加密、为扫描图片或格式不受支持，请尝试另存为文本PDF或使用Word格式'));
+        throw new BadRequestException('PDF 解析失败：' + (e.message || '文件可能已加密、为扫描图片或格式不受支持，请尝试另存为文本PDF或使用Word格式'));
       }
     } else if (ext === 'docx') {
       try {
@@ -28,7 +28,7 @@ export class ResumeParserService {
         const result = await mammoth.extractRawText({ buffer });
         text = result.value;
       } catch (e: any) {
-        throw new Error('Word 解析失败：' + e.message);
+        throw new BadRequestException('Word 解析失败：' + e.message);
       }
     } else if (ext === 'doc') {
       try {
@@ -43,7 +43,7 @@ export class ResumeParserService {
     }
 
     if (!text || text.length < 30) {
-      throw new Error('无法从文件中提取文本，请确认文件格式或尝试另存为PDF后重新上传');
+      throw new BadRequestException('无法从文件中提取文本，请确认文件格式或尝试另存为PDF后重新上传');
     }
 
     const parsed = await this.parseWithAI(text);

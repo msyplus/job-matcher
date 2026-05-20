@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ExperienceService } from './experience.service';
@@ -15,7 +15,7 @@ export class ExperienceController {
   @Post('upload-resume')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
   async uploadResume(@Req() req: any, @UploadedFile() file: Express.Multer.File) {
-    if (!file) throw new Error('请上传文件');
+    if (!file) throw new BadRequestException('请上传文件');
     const parsed = await this.resumeParser.parse(file.buffer, file.originalname);
     // Auto-save parsed data
     await this.resumeParser.saveParsedData(req.user.id, parsed);
